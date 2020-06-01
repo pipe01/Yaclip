@@ -52,7 +52,7 @@ namespace LogicCommandLineParser
 
             var arg = b.Build();
 
-            if (!arg.Required && Arguments.Any(o => o.Required))
+            if (arg.Required && Arguments.Any(o => !o.Required))
                 throw new BuilderException("Required arguments must appear before optional ones");
 
             Arguments.Add(arg);

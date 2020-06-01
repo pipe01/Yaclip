@@ -24,11 +24,11 @@ class Program
             .Command<NewOptions>("new", c => c
                 .Description("Creates a new file")
                 .Callback(o => Console.WriteLine(o.Name)) // The callback will be called when app.Run is called
-                .Argument(o => o.Size, a => a
-                    .Name("size"))
                 .Argument(o => o.Name, a => a
                     .Name("name")
                     .Required(true)) // Default is false
+                .Argument(o => o.Size, a => a
+                    .Name("size"))
                 .Option(o => o.Extension, o => o
                     .ShortName('e')
                     .LongName("extension")
@@ -47,7 +47,7 @@ class Program
 My example application.
 
 Usage:
-  myapp new [size] <name> [-e=<ext> | --extension=<ext>]
+  myapp new <name> [size] [-e=<ext> | --extension=<ext>]
   myapp help [command]
 ```
 
@@ -57,7 +57,7 @@ My example application.
 
 Creates a new file
 
-Usage: myapp new [size] <name> [-e=<ext> | --extension=<ext>]
+Usage: myapp new <name> [size] [-e=<ext> | --extension=<ext>]
 
 Options:
   -e=<ext>, --extension=<ext>  The extension of the new file

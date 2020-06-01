@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq.Expressions;
 
@@ -17,46 +18,31 @@ namespace LogicCommandLineParser
             Expression.Lambda<Action<object>>(Expression.Assign(memberExpr, Expression.Constant(value)), objParam).Compile()(target);
         }
 
-        public static object ParseValue(string str, Type type)
+        public static bool TryParseValue(string str, Type type, [MaybeNullWhen(false)]out object value)
         {
-            switch (Type.GetTypeCode(type))
+            value = Type.GetTypeCode(type) switch
             {
-                case TypeCode.String:
-                    return str;
-                case TypeCode.Char:
-                    return char.Parse(str);
-                case TypeCode.Byte:
-                    return byte.Parse(str);
-                case TypeCode.SByte:
-                    return sbyte.Parse(str);
-                case TypeCode.Int16:
-                    return short.Parse(str);
-                case TypeCode.UInt16:
-                    return ushort.Parse(str);
-                case TypeCode.Int32:
-                    return int.Parse(str);
-                case TypeCode.UInt32:
-                    return uint.Parse(str);
-                case TypeCode.Int64:
-                    return long.Parse(str);
-                case TypeCode.UInt64:
-                    return ulong.Parse(str);
-                case TypeCode.Single:
-                    return float.Parse(str, CultureInfo.InvariantCulture);
-                case TypeCode.Double:
-                    return double.Parse(str, CultureInfo.InvariantCulture);
-                case TypeCode.Decimal:
-                    return decimal.Parse(str, CultureInfo.InvariantCulture);
-                case TypeCode.Boolean:
-                    if (str.Equals("yes", StringComparison.InvariantCultureIgnoreCase))
-                        return true;
-                    if (str.Equals("no", StringComparison.InvariantCultureIgnoreCase))
-                        return false;
+                TypeCode.String => str,
+                TypeCode.Char => char.Parse(str),
+                TypeCode.Byte => byte.Parse(str),
+                TypeCode.SByte => sbyte.Parse(str),
+                TypeCode.Int16 => short.Parse(str),
+                TypeCode.UInt16 => ushort.Parse(str),
+                TypeCode.Int32 => int.Parse(str),
+                TypeCode.UInt32 => uint.Parse(str),
+                TypeCode.Int64 => long.Parse(str),
+                TypeCode.UInt64 => ulong.Parse(str),
+                TypeCode.Single => float.Parse(str, CultureInfo.InvariantCulture),
+                TypeCode.Double => double.Parse(str, CultureInfo.InvariantCulture),
+                TypeCode.Decimal => decimal.Parse(str, CultureInfo.InvariantCulture),
+                TypeCode.Boolean =>
+                    str.Equals("yes", StringComparison.InvariantCultureIgnoreCase) ? true :
+                    str.Equals("no", StringComparison.InvariantCultureIgnoreCase) ? false :
+                    bool.Parse(str),
+                _ => null
+            };
 
-                    return bool.Parse(str);
-            }
-
-            throw new BuilderException($"Cannot parse type {type.Name}");
+            return value != null;
         }
 
         private class MyExpressionVisitor : ExpressionVisitor

@@ -3,7 +3,9 @@ using LogicCommandLineParser.Parsing;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Reflection;
 
 namespace LogicCommandLineParser
 {
@@ -31,7 +33,7 @@ namespace LogicCommandLineParser
             {
                 RunInner(args);
             }
-            catch (RunException ex)
+            catch (RunException ex) when (!Debugger.IsAttached)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.Error.WriteLine(ex.Message);
@@ -94,7 +96,8 @@ namespace LogicCommandLineParser
             var arg = ctx.Command.Arguments[ctx.SetArgumentsCount];
             ctx.SetArgumentsCount++;
 
-            var value = ValueSetter.ParseValue(token.Content, arg.Type);
+            if (!ValueSetter.TryParseValue(token.Content, arg.Type, out var value))
+                throw new RunException($"Cannot parse value at position {ctx.Tokens.PeekOrDefault()?.Position}");
 
             ValueSetter.SetValue(ctx.OptionsObj, arg.MemberExpression, value);
         }
@@ -111,24 +114,52 @@ namespace LogicCommandLineParser
             if (opt == null)
                 throw new RunException($"Unknown option at position {token.Position}");
 
-            object value;
-
-            var valueToken = ctx.Tokens.PeekOrDefault();
-            if (valueToken is StringToken valStrToken)
+            if (!TryTakeValue(ref ctx, opt.ValueType, out var value))
             {
-                ctx.Tokens.Dequeue();
-                value = ValueSetter.ParseValue(valStrToken.Content, opt.ValueType);
-            }
-            else if (opt.ValueType == typeof(bool))
-            {
-                value = true;
-            }
-            else
-            {
-                throw new RunException($"Expected value at position {valueToken.Position}");
+                if (opt.ValueType == typeof(bool))
+                    value = true;
+                else
+                    throw new RunException($"Expected value at position {ctx.Tokens.PeekOrDefault()?.Position}");
             }
 
             ValueSetter.SetValue(ctx.OptionsObj, opt.MemberExpression, value);
+        }
+
+        private static bool TryTakeValue(ref RunContext ctx, Type valueType, [MaybeNullWhen(false)] out object value)
+        {
+            if (valueType.IsArray)
+            {
+                var del = (TakeArrayDelegate)typeof(LogicApp).GetMethod(nameof(TakeArray), BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(valueType.GetElementType()).CreateDelegate(typeof(TakeArrayDelegate));
+                value = del(ctx);
+                return true;
+            }
+
+            if (!(ctx.Tokens.PeekOrDefault() is StringToken strToken))
+            {
+                value = null;
+                return false;
+            }
+
+            ctx.Tokens.Dequeue();
+            return ValueSetter.TryParseValue(strToken.Content, valueType, out value);
+        }
+
+        private delegate object TakeArrayDelegate(RunContext ctx);
+        private static object TakeArray<T>(RunContext ctx)
+        {
+            var list = new List<T>();
+
+            while (ctx.Tokens.PeekOrDefault() is StringToken strToken)
+            {
+                ctx.Tokens.Dequeue();
+
+                if (!ValueSetter.TryParseValue(strToken.Content, typeof(T), out var obj))
+                    throw new RunException($"Cannot parse value into {typeof(T).Name} at position {strToken.Position}");
+
+                list.Add((T)obj);
+            }
+
+            return list.ToArray();
         }
 
         private ref struct RunContext

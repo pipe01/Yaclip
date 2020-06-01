@@ -69,7 +69,7 @@ namespace LogicCommandLineParser
 
             int requiredArgCount = cmd.Arguments.Count(o => o.Required);
             if (requiredArgCount > ctx.SetArgumentsCount)
-                throw new RunException("Missing required arguments: " + string.Join(", ", cmd.Arguments.OrderBy(o => o.Required).Skip(ctx.SetArgumentsCount).Where(o => o.Required).Select(o => o.Name)));
+                throw new RunException("Missing required arguments: " + string.Join(", ", cmd.Arguments.Skip(ctx.SetArgumentsCount).Where(o => o.Required).Select(o => o.Name)));
 
             cmd.Run(optionsObj);
         }

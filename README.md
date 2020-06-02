@@ -1,4 +1,4 @@
-# LogicCommandLineParser
+# Yaclip
 
 Library with a fluent interface for parsing command line arguments in C#.
 
@@ -17,7 +17,7 @@ class Program
 {
     static void Main(string[] args)
     {
-        var app = LogicApp.New()
+        var app = YaclipApp.New()
             .Name("My example application")
             .ExecutableName("myapp") // If not specified it will be guessed from the current process name
             .GenerateHelpCommand(true) // Default is true

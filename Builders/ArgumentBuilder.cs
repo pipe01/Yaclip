@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace LogicCommandLineParser.Builders
+namespace Yaclip.Builders
 {
     public interface IArgumentBuilder<T>
     {

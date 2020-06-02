@@ -3,7 +3,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 
-namespace LogicCommandLineParser
+namespace Yaclip
 {
     internal class HelpCommand : Command
     {
@@ -12,9 +12,9 @@ namespace LogicCommandLineParser
             public string? Command { get; set; }
         }
 
-        private readonly LogicApp App;
+        private readonly YaclipApp App;
 
-        public HelpCommand(LogicApp app)
+        public HelpCommand(YaclipApp app)
         {
             this.App = app ?? throw new ArgumentNullException(nameof(app));
 

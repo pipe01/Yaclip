@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace LogicCommandLineParser.Parsing
+namespace Yaclip.Parsing
 {
     internal static class Parser
     {

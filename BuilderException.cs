@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LogicCommandLineParser
+namespace Yaclip
 {
     public class BuilderException : Exception
     {

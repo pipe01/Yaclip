@@ -1,4 +1,4 @@
-﻿namespace LogicCommandLineParser.Parsing
+﻿namespace Yaclip.Parsing
 {
     internal class ShortOptionToken : IOptionToken
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 
-namespace LogicCommandLineParser
+namespace Yaclip
 {
     internal class Argument
     {

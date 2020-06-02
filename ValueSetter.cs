@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq.Expressions;
 
-namespace LogicCommandLineParser
+namespace Yaclip
 {
     internal static class ValueSetter
     {

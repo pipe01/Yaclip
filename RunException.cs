@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LogicCommandLineParser
+namespace Yaclip
 {
     internal sealed class RunException : Exception
     {

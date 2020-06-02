@@ -1,10 +1,10 @@
-﻿using LogicCommandLineParser.Builders;
+﻿using Yaclip.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace LogicCommandLineParser
+namespace Yaclip
 {
     public interface ICommandBuilder<T>
     {

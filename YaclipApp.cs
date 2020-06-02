@@ -1,5 +1,5 @@
-﻿using LogicCommandLineParser.Builders;
-using LogicCommandLineParser.Parsing;
+﻿using Yaclip.Builders;
+using Yaclip.Parsing;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,17 +7,17 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
-namespace LogicCommandLineParser
+namespace Yaclip
 {
-    public class LogicApp
+    public class YaclipApp
     {
         internal IDictionary<string, Command> Commands { get; } = new Dictionary<string, Command>();
         internal string? Name { get; }
         internal string? ExecutableName { get; }
 
-        public static ILogicAppBuilder New() => new LogicAppBuilder();
+        public static IYaclipAppBuilder New() => new YaclipAppBuilder();
 
-        internal LogicApp(IEnumerable<Command> commands, string? name, string? exeName, bool generateHelp)
+        internal YaclipApp(IEnumerable<Command> commands, string? name, string? exeName, bool generateHelp)
         {
             this.Commands = commands.ToDictionary(o => o.Name);
             this.Name = name ?? Process.GetCurrentProcess().ProcessName;
@@ -129,7 +129,7 @@ namespace LogicCommandLineParser
         {
             if (valueType.IsArray)
             {
-                var del = (TakeArrayDelegate)typeof(LogicApp).GetMethod(nameof(TakeArray), BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(valueType.GetElementType()).CreateDelegate(typeof(TakeArrayDelegate));
+                var del = (TakeArrayDelegate)typeof(YaclipApp).GetMethod(nameof(TakeArray), BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(valueType.GetElementType()).CreateDelegate(typeof(TakeArrayDelegate));
                 value = del(ctx);
                 return true;
             }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace LogicCommandLineParser
+namespace Yaclip
 {
     internal static class Extensions
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LogicCommandLineParser.Parsing
+namespace Yaclip.Parsing
 {
     internal class StringToken : IToken
     {

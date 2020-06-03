@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Yaclip
@@ -16,23 +17,16 @@ namespace Yaclip
             if (b.Length > a.Length)
                 return false;
 
-            int i = 0;
-            bool anyElemEqual = true;
+            int len = Math.Min(a.Length, b.Length);
+            int i;
 
-            while (i < a.Length)
+            for (i = 0; i < len; i++)
             {
-                if (i >= b.Length)
-                    break;
-
-                anyElemEqual = Equals(a[i], b[i]);
-
-                if (!anyElemEqual)
+                if (!Equals(a[i], b[i]))
                     return false;
-
-                i++;
             }
 
-            return anyElemEqual;
+            return i >= b.Length - 1;
         }
     }
 }

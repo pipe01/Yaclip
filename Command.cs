@@ -6,11 +6,13 @@ namespace Yaclip
     {
         public string? Description { get; protected set; }
 #nullable disable
-        public string Name { get; protected set; }
+        public string[] Name { get; protected set; }
         public Option[] Options { get; protected set; }
         public Argument[] Arguments { get; protected set; }
         public Type ObjectType { get; protected set; }
 #nullable enable
+
+        public string FullName => string.Join(" ", Name);
 
         public abstract void Run(object obj);
     }
@@ -19,7 +21,7 @@ namespace Yaclip
     {
         public Action<T> Callback { get; }
 
-        public Command(string name, string? description, Option[] options, Argument[] arguments, Type objectType, Action<T>? callback)
+        public Command(string[] name, string? description, Option[] options, Argument[] arguments, Type objectType, Action<T>? callback)
         {
             this.Name = name ?? throw new ArgumentNullException(nameof(name));
             this.Options = options;

@@ -79,7 +79,7 @@ namespace Yaclip
             if (CallbackAction == null)
                 throw new BuilderException("Missing callback action");
 
-            return new Command<T>(Name, Description, Options.ToArray(), Arguments.ToArray(), typeof(T), CallbackAction);
+            return new Command<T>(Name.Split(' '), Description, Options.ToArray(), Arguments.ToArray(), typeof(T), CallbackAction);
         }
     }
 }

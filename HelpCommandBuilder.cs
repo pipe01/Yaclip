@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -9,7 +10,7 @@ namespace Yaclip
     {
         private class HelpOptions
         {
-            public string? Command { get; set; }
+            public string[]? Command { get; set; }
         }
 
         private readonly YaclipApp App;
@@ -18,10 +19,13 @@ namespace Yaclip
         {
             this.App = app ?? throw new ArgumentNullException(nameof(app));
 
-            this.Name = "help";
+            this.Name = new[] { "help" };
             this.Description = "Provides help about the usage of the program and its commands.";
             this.Options = Array.Empty<Option>();
-            this.Arguments = new[] { new Argument(typeof(string), Expression.Property(Expression.Variable(typeof(HelpOptions)), nameof(HelpOptions.Command)), false, "command") };
+            this.Arguments = new[]
+            {
+                new Argument(typeof(string[]), Expression.Property(Expression.Variable(typeof(HelpOptions)), nameof(HelpOptions.Command)), false, "cmd"),
+            };
             this.ObjectType = typeof(HelpOptions);
         }
 
@@ -31,39 +35,46 @@ namespace Yaclip
 
             if (opts.Command == null)
             {
-                Console.WriteLine(GeneralHelp());
+                HelpForCommands(App.Commands);
             }
             else
             {
-                if (!App.Commands.TryGetValue(opts.Command, out var cmd))
+                var cmds = App.Commands.Where(o => o.Name.StartsWith(opts.Command)).ToArray();
+
+                if (cmds.Length == 0)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Invalid command '{opts.Command}'");
+                    Console.WriteLine($"Unknown command '{string.Join(" ", opts.Command)}'");
                     Console.ForegroundColor = ConsoleColor.Gray;
-                    return;
                 }
-
-                Console.WriteLine(HelpForCommand(cmd));
+                else if (cmds.Length == 1)
+                {
+                    HelpForCommand(cmds[0]);
+                }
+                else
+                {
+                    HelpForCommands(cmds);
+                }
             }
         }
 
-        private string GeneralHelp()
+        private void HelpForCommands(IEnumerable<Command> cmds)
         {
             var str = new StringBuilder();
             AppendHeader(str);
 
             str.AppendLine("Usage:");
 
-            foreach (var cmd in App.Commands.Values)
+            foreach (var cmd in cmds)
             {
                 str.Append("  ");
                 AppendCommand(str, cmd);
             }
 
-            return str.ToString();
+            Console.WriteLine(str.ToString());
         }
 
-        private string HelpForCommand(Command cmd)
+        private void HelpForCommand(Command cmd)
         {
             var str = new StringBuilder();
             AppendHeader(str);
@@ -92,7 +103,7 @@ namespace Yaclip
                 }
             }
 
-            return str.ToString();
+            Console.WriteLine(str.ToString());
         }
 
         private void AppendHeader(StringBuilder str)
@@ -103,7 +114,7 @@ namespace Yaclip
 
         private void AppendCommand(StringBuilder str, Command cmd)
         {
-            str.Append($"{App.ExecutableName} {cmd.Name}");
+            str.Append($"{App.ExecutableName} {cmd.FullName}");
 
             foreach (var arg in cmd.Arguments)
             {
@@ -133,6 +144,9 @@ namespace Yaclip
                 str.Append(">");
             else
                 str.Append("]");
+
+            if (arg.Type.IsArray)
+                str.Append("...");
         }
 
         private static void AppendOption(StringBuilder str, Option opt, bool appendDelims = true)

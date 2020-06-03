@@ -27,8 +27,11 @@ namespace Yaclip.Builders
 
             var cmd = b.Build();
 
-            if (Commands.Any(o => o.Name == cmd.Name))
-                throw new BuilderException($"Duplicate command name '{cmd.Name}'");
+            if (Commands.Any(o => o.Name.SequenceEqual(cmd.Name)))
+                throw new BuilderException($"Duplicate command name '{cmd.FullName}'");
+
+            if (Commands.Any(o => cmd.Name.ContainsAllItems(o.Name)))
+                throw new BuilderException($"Command '{cmd.FullName}' overlaps another command");
 
             Commands.Add(cmd);
             return this;
@@ -54,7 +57,7 @@ namespace Yaclip.Builders
 
         public YaclipApp Build()
         {
-            return new YaclipApp(Commands, Name, ExecutableName, GenerateHelp);
+            return new YaclipApp(new CommandCollection(Commands), Name, ExecutableName, GenerateHelp);
         }
     }
 }

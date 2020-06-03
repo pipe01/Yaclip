@@ -6,25 +6,26 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace Yaclip
 {
     public class YaclipApp
     {
-        internal IDictionary<string, Command> Commands { get; } = new Dictionary<string, Command>();
+        internal CommandCollection Commands { get; }
         internal string? Name { get; }
         internal string? ExecutableName { get; }
 
         public static IYaclipAppBuilder New() => new YaclipAppBuilder();
 
-        internal YaclipApp(IEnumerable<Command> commands, string? name, string? exeName, bool generateHelp)
+        internal YaclipApp(CommandCollection commands, string? name, string? exeName, bool generateHelp)
         {
-            this.Commands = commands.ToDictionary(o => o.Name);
+            this.Commands = commands;
             this.Name = name ?? Process.GetCurrentProcess().ProcessName;
             this.ExecutableName = exeName ?? Process.GetCurrentProcess().ProcessName;
 
             if (generateHelp)
-                this.Commands.Add("help", new HelpCommand(this));
+                this.Commands.Add(new HelpCommand(this));
         }
 
         public void Run(string[] args)
@@ -47,26 +48,20 @@ namespace Yaclip
 
             if (tokens.Count == 0)
             {
-                if (Commands.ContainsKey("help"))
+                if (Commands.TryGet(out _, "help"))
                     tokens.Enqueue(new StringToken("help", 0));
                 else
                     return;
             }
 
-            if (!(tokens.Dequeue() is StringToken cmdToken))
-                throw new RunException("Missing command name");
-
-            string cmdName = cmdToken.Content;
-
-            if (!Commands.TryGetValue(cmdName, out var cmd))
-                throw new RunException("Unknown command");
+            var cmd = GetCommand(tokens);
 
             var optionsObj = Activator.CreateInstance(cmd.ObjectType);
 
             var ctx = new RunContext(optionsObj, tokens, cmd);
             while (tokens.Count > 0)
             {
-                ApplyToken(ref ctx, tokens.Dequeue());
+                ApplyToken(ref ctx);
             }
 
             int requiredArgCount = cmd.Arguments.Count(o => o.Required);
@@ -76,19 +71,48 @@ namespace Yaclip
             cmd.Run(optionsObj);
         }
 
-        private static void ApplyToken(ref RunContext ctx, IToken token)
+        private Command GetCommand(Queue<IToken> tokens)
         {
-            if (token is StringToken strToken)
+            int i = 0;
+            var cmdSoFar = new StringBuilder();
+
+            var commands = new List<Command>(Commands);
+
+            while (commands.Count > 1 && tokens.Count > 0)
             {
-                ApplyArgument(ref ctx, strToken);
+                var token = tokens.Dequeue();
+
+                if (!(token is StringToken strToken))
+                    throw new RunException($"Expected command name at {token.Position}");
+
+                cmdSoFar.Append(strToken.Content).Append(' ');
+
+                commands.RemoveAll(o => o.Name.Length <= i || o.Name[i] != strToken.Content);
+                i++;
             }
-            else if (token is IOptionToken opt)
+
+            if (commands.Count != 1)
+                throw new RunException($"Unknown command '{cmdSoFar.ToString().TrimEnd()}'");
+
+            return commands[0];
+        }
+
+        private static void ApplyToken(ref RunContext ctx)
+        {
+            var token = ctx.Tokens.Peek();
+
+            if (token is IOptionToken opt)
             {
+                ctx.Tokens.Dequeue();
                 ApplyOption(ref ctx, opt);
+            }
+            else
+            {
+                ApplyArgument(ref ctx);
             }
         }
 
-        private static void ApplyArgument(ref RunContext ctx, StringToken token)
+        private static void ApplyArgument(ref RunContext ctx)
         {
             if (ctx.SetArgumentsCount == ctx.Command.Arguments.Length)
                 throw new RunException("Argument found when no more were necessary");
@@ -96,7 +120,7 @@ namespace Yaclip
             var arg = ctx.Command.Arguments[ctx.SetArgumentsCount];
             ctx.SetArgumentsCount++;
 
-            if (!ValueSetter.TryParseValue(token.Content, arg.Type, out var value))
+            if (!TryTakeValue(ref ctx, arg.Type, out var value))
                 throw new RunException($"Cannot parse value at position {ctx.Tokens.PeekOrDefault()?.Position}");
 
             ValueSetter.SetValue(ctx.OptionsObj, arg.MemberExpression, value);

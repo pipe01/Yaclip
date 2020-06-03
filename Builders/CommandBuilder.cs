@@ -31,13 +31,13 @@ namespace Yaclip
             this.Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
-        ICommandBuilder<T> ICommandBuilder<T>.Option<TOpt>(Expression<Func<T, TOpt>> expr, char shortName, Action<IOptionBuilder<TOpt>>? builder = null)
+        ICommandBuilder<T> ICommandBuilder<T>.Option<TOpt>(Expression<Func<T, TOpt>> expr, char shortName, Action<IOptionBuilder<TOpt>>? builder)
             => Option(expr, shortName, null, builder);
         
-        ICommandBuilder<T> ICommandBuilder<T>.Option<TOpt>(Expression<Func<T, TOpt>> expr, string longName, Action<IOptionBuilder<TOpt>>? builder = null)
+        ICommandBuilder<T> ICommandBuilder<T>.Option<TOpt>(Expression<Func<T, TOpt>> expr, string longName, Action<IOptionBuilder<TOpt>>? builder)
             => Option(expr, null, longName, builder);
         
-        ICommandBuilder<T> ICommandBuilder<T>.Option<TOpt>(Expression<Func<T, TOpt>> expr, char shortName, string longName, Action<IOptionBuilder<TOpt>>? builder = null)
+        ICommandBuilder<T> ICommandBuilder<T>.Option<TOpt>(Expression<Func<T, TOpt>> expr, char shortName, string longName, Action<IOptionBuilder<TOpt>>? builder)
             => Option(expr, shortName, longName, builder);
 
         private ICommandBuilder<T> Option<TOpt>(Expression<Func<T, TOpt>> expr, char? shortName, string? longName, Action<IOptionBuilder<TOpt>>? builder)

@@ -92,7 +92,14 @@ namespace Yaclip
             }
 
             if (commands.Count != 1)
-                throw new RunException($"Unknown command '{cmdSoFar.ToString().TrimEnd()}'");
+            {
+                string msg = $"Unknown command '{cmdSoFar.ToString().TrimEnd()}'. ";
+
+                if (commands.Count > 1)
+                    msg += "Did you mean: " + string.Join(", ", commands.Select(o => $"'{o.FullName}'")) + "?";
+
+                throw new RunException(msg);
+            }
 
             return commands[0];
         }

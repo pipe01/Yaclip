@@ -8,7 +8,10 @@ namespace Yaclip
 {
     public interface ICommandBuilder<T>
     {
-        ICommandBuilder<T> Option<TOpt>(Expression<Func<T, TOpt>> expr, Action<IOptionBuilder<TOpt>> builder);
+        ICommandBuilder<T> Option<TOpt>(Expression<Func<T, TOpt>> expr, char shortName, string longName, Action<IOptionBuilder<TOpt>>? builder = null);
+        ICommandBuilder<T> Option<TOpt>(Expression<Func<T, TOpt>> expr, string longName, Action<IOptionBuilder<TOpt>>? builder = null);
+        ICommandBuilder<T> Option<TOpt>(Expression<Func<T, TOpt>> expr, char shortName, Action<IOptionBuilder<TOpt>>? builder = null);
+
         ICommandBuilder<T> Argument<TArg>(Expression<Func<T, TArg>> expr, Action<IArgumentBuilder<TArg>> builder);
         ICommandBuilder<T> Callback(Action<T> action);
         ICommandBuilder<T> Description(string description);
@@ -28,10 +31,19 @@ namespace Yaclip
             this.Name = name ?? throw new ArgumentNullException(nameof(name));
         }
 
-        ICommandBuilder<T> ICommandBuilder<T>.Option<TOpt>(Expression<Func<T, TOpt>> expr, Action<IOptionBuilder<TOpt>> builder)
+        ICommandBuilder<T> ICommandBuilder<T>.Option<TOpt>(Expression<Func<T, TOpt>> expr, char shortName, Action<IOptionBuilder<TOpt>>? builder = null)
+            => Option(expr, shortName, null, builder);
+        
+        ICommandBuilder<T> ICommandBuilder<T>.Option<TOpt>(Expression<Func<T, TOpt>> expr, string longName, Action<IOptionBuilder<TOpt>>? builder = null)
+            => Option(expr, null, longName, builder);
+        
+        ICommandBuilder<T> ICommandBuilder<T>.Option<TOpt>(Expression<Func<T, TOpt>> expr, char shortName, string longName, Action<IOptionBuilder<TOpt>>? builder = null)
+            => Option(expr, shortName, longName, builder);
+
+        private ICommandBuilder<T> Option<TOpt>(Expression<Func<T, TOpt>> expr, char? shortName, string? longName, Action<IOptionBuilder<TOpt>>? builder)
         {
-            var b = new OptionBuilder<TOpt>(expr.Body);
-            builder(b);
+            var b = new OptionBuilder<TOpt>(expr.Body, shortName, longName);
+            builder?.Invoke(b);
 
             var opt = b.Build();
 

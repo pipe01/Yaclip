@@ -5,8 +5,6 @@ namespace Yaclip
 {
     public interface IOptionBuilder<T>
     {
-        IOptionBuilder<T> ShortName(char n);
-        IOptionBuilder<T> LongName(string n);
         IOptionBuilder<T> ValueName(string name);
         IOptionBuilder<T> Description(string desc);
     }
@@ -18,21 +16,11 @@ namespace Yaclip
 
         private readonly Expression Expression;
 
-        public OptionBuilder(Expression expr)
+        public OptionBuilder(Expression expr, char? shortName, string? longName)
         {
             this.Expression = expr ?? throw new ArgumentNullException(nameof(expr));
-        }
-
-        IOptionBuilder<T> IOptionBuilder<T>.ShortName(char n)
-        {
-            ShortName = n;
-            return this;
-        }
-
-        IOptionBuilder<T> IOptionBuilder<T>.LongName(string n)
-        {
-            LongName = n;
-            return this;
+            this.ShortName = shortName;
+            this.LongName = longName;
         }
 
         IOptionBuilder<T> IOptionBuilder<T>.ValueName(string name)

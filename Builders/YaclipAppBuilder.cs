@@ -30,8 +30,9 @@ namespace Yaclip.Builders
             if (Commands.Any(o => o.Name.SequenceEqual(cmd.Name)))
                 throw new BuilderException($"Duplicate command name '{cmd.FullName}'");
 
-            if (Commands.Any(o => cmd.Name.ContainsAllItems(o.Name)))
-                throw new BuilderException($"Command '{cmd.FullName}' overlaps another command");
+            var overlapping = Commands.FirstOrDefault(a => Commands.Any(b => a.Name.StartsWith(b.Name)));
+            if (overlapping != null)
+                throw new BuilderException($"Command '{overlapping.FullName}' overlaps another command");
 
             Commands.Add(cmd);
             return this;

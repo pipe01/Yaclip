@@ -29,9 +29,7 @@ class Program
                     .Required(true)) // Default is false
                 .Argument(o => o.Size, a => a
                     .Name("size"))
-                .Option(o => o.Extension, o => o
-                    .ShortName('e')
-                    .LongName("extension")
+                .Option(o => o.Extension, 'e', "extension", o => o
                     .Description("The extension of the new file")
                     .ValueName("ext"))); // Only used for generating help message
 

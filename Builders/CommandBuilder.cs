@@ -47,11 +47,13 @@ namespace Yaclip
 
             var opt = b.Build();
 
+#if DEBUG
             if (opt.LongName != null && Options.Any(o => o.LongName == opt.LongName))
                 throw new BuilderException($"Duplicate option long name '{opt.LongName}'");
 
             if (opt.ShortName != null && Options.Any(o => o.ShortName == opt.ShortName))
                 throw new BuilderException($"Duplicate option short name '{opt.ShortName}'");
+#endif
 
             Options.Add(opt);
             return this;

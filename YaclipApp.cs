@@ -71,12 +71,12 @@ namespace Yaclip
             cmd.Run(optionsObj);
         }
 
-        private ICommand GetCommand(Queue<IToken> tokens)
+        private Command GetCommand(Queue<IToken> tokens)
         {
             int i = 0;
             var cmdSoFar = new StringBuilder();
 
-            var commands = new List<ICommand>(Commands);
+            var commands = new List<Command>(Commands);
 
             while (commands.Count > 1 && tokens.Count > 0)
             {
@@ -96,7 +96,7 @@ namespace Yaclip
                 string msg = $"Unknown command '{cmdSoFar.ToString().TrimEnd()}'. ";
 
                 if (commands.Count > 1)
-                    msg += "Did you mean: " + string.Join(", ", commands.Select(o => $"'{o.FullName()}'")) + "?";
+                    msg += "Did you mean " + string.Join(", ", commands.Select(o => $"'{o.FullName}'")) + "?";
 
                 throw new RunException(msg);
             }
@@ -197,11 +197,11 @@ namespace Yaclip
         {
             public object OptionsObj { get; }
             public Queue<IToken> Tokens { get; }
-            public ICommand Command { get; }
+            public Command Command { get; }
 
             public int SetArgumentsCount { get; set; }
 
-            public RunContext(object optionsObj, Queue<IToken> tokens, ICommand command)
+            public RunContext(object optionsObj, Queue<IToken> tokens, Command command)
             {
                 this.OptionsObj = optionsObj;
                 this.Tokens = tokens;

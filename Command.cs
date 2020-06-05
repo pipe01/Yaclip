@@ -2,34 +2,25 @@
 
 namespace Yaclip
 {
-    internal interface ICommand
+    internal class Command
     {
-        string[] Name { get; }
-        string? Description { get; }
-        Func<object> Factory { get; }
-        Type ObjectType { get; }
-        Option[] Options { get; }
-        Argument[] Arguments { get; }
+        public virtual string[] Name { get; }
+        public virtual string? Description { get; }
+        public virtual Func<object> Factory { get; }
+        public virtual Option[] Options { get; }
+        public virtual Argument[] Arguments { get; }
+        public virtual Type ObjectType { get; }
+        public virtual Action<object> Callback { get; }
 
-        void Run(object obj);
-    }
+        public string FullName => string.Join(" ", Name);
 
-    internal static class CommandExtensions
-    {
-        public static string FullName(this ICommand cmd) => string.Join(" ", cmd.Name);
-    }
+#nullable disable
+        protected Command()
+        {
+        }
+#nullable enable
 
-    internal class Command<T> : ICommand
-    {
-        public string[] Name { get; }
-        public string? Description { get; }
-        public Func<object> Factory { get; }
-        public Option[] Options { get; }
-        public Argument[] Arguments { get; }
-        public Type ObjectType { get; }
-        public Action<T> Callback { get; }
-
-        public Command(string[] name, string? description, Func<object> factory, Option[] options, Argument[] arguments, Type objectType, Action<T> callback)
+        public Command(string[] name, string? description, Func<object> factory, Option[] options, Argument[] arguments, Type objectType, Action<object> callback)
         {
             this.Name = name ?? throw new ArgumentNullException(nameof(name));
             this.Description = description;
@@ -40,9 +31,9 @@ namespace Yaclip
             this.Callback = callback ?? throw new ArgumentNullException(nameof(callback));
         }
 
-        public void Run(object obj)
+        public virtual void Run(object obj)
         {
-            Callback((T)obj);
+            Callback(obj);
         }
     }
 }

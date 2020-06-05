@@ -97,7 +97,7 @@ namespace Yaclip
             return this;
         }
 
-        public Command<T> Build()
+        public Command Build()
         {
             if (CallbackAction == null)
                 throw new BuilderException("Missing callback action");
@@ -105,7 +105,7 @@ namespace Yaclip
             if (FactoryMethod == null)
                 FactoryMethod = Activator.CreateInstance<T>;
 
-            return new Command<T>(Name.Split(' '), Description, () => FactoryMethod()!, Options.ToArray(), Arguments.ToArray(), typeof(T), CallbackAction);
+            return new Command(Name.Split(' '), Description, () => FactoryMethod()!, Options.ToArray(), Arguments.ToArray(), typeof(T), o => CallbackAction((T)o));
         }
     }
 }

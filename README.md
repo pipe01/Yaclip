@@ -1,4 +1,5 @@
 # Yaclip
+![Nuget](https://img.shields.io/nuget/v/Yaclip)
 
 Library with a fluent interface for parsing command line arguments in C#.
 

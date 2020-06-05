@@ -6,27 +6,27 @@ using System.Linq;
 
 namespace Yaclip
 {
-    internal sealed class CommandCollection : IList<Command>
+    internal sealed class CommandCollection : IList<ICommand>
     {
-        private readonly IList<Command> InnerList;
+        private readonly IList<ICommand> InnerList;
 
-        public CommandCollection(IList<Command> innerList)
+        public CommandCollection(IList<ICommand> innerList)
         {
             this.InnerList = innerList ?? throw new ArgumentNullException(nameof(innerList));
         }
 
-        public Command this[int index] { get => this.InnerList[index]; set => this.InnerList[index] = value; }
+        public ICommand this[int index] { get => this.InnerList[index]; set => this.InnerList[index] = value; }
 
         public int Count => this.InnerList.Count;
 
         public bool IsReadOnly => this.InnerList.IsReadOnly;
 
-        public void Add(Command item)
+        public void Add(ICommand item)
         {
             this.InnerList.Add(item);
         }
 
-        public bool TryGet([MaybeNullWhen(false)] out Command command, params string[] name)
+        public bool TryGet([MaybeNullWhen(false)] out ICommand command, params string[] name)
         {
             foreach (var cmd in InnerList)
             {
@@ -46,32 +46,32 @@ namespace Yaclip
             this.InnerList.Clear();
         }
 
-        public bool Contains(Command item)
+        public bool Contains(ICommand item)
         {
             return this.InnerList.Contains(item);
         }
 
-        public void CopyTo(Command[] array, int arrayIndex)
+        public void CopyTo(ICommand[] array, int arrayIndex)
         {
             this.InnerList.CopyTo(array, arrayIndex);
         }
 
-        public IEnumerator<Command> GetEnumerator()
+        public IEnumerator<ICommand> GetEnumerator()
         {
             return this.InnerList.GetEnumerator();
         }
 
-        public int IndexOf(Command item)
+        public int IndexOf(ICommand item)
         {
             return this.InnerList.IndexOf(item);
         }
 
-        public void Insert(int index, Command item)
+        public void Insert(int index, ICommand item)
         {
             this.InnerList.Insert(index, item);
         }
 
-        public bool Remove(Command item)
+        public bool Remove(ICommand item)
         {
             return this.InnerList.Remove(item);
         }

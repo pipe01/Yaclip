@@ -6,30 +6,31 @@ using System.Text;
 
 namespace Yaclip
 {
-    internal class HelpCommand : Command
+    internal class HelpCommand : ICommand
     {
         private class HelpOptions
         {
             public string[]? Command { get; set; }
         }
 
+        public string[] Name { get; } = new[] { "help" };
+        public string? Description { get; } = "Provides help about the usage of the program and its commands.";
+        public Func<object> Factory { get; } = () => new HelpOptions();
+        public Type ObjectType { get; } = typeof(HelpOptions);
+        public Option[] Options { get; } = Array.Empty<Option>();
+        public Argument[] Arguments { get; } = new[]
+        {
+            new Argument(typeof(string[]), Expression.Property(Expression.Variable(typeof(HelpOptions)), nameof(HelpOptions.Command)), false, "cmd"),
+        };
+
         private readonly YaclipApp App;
 
         public HelpCommand(YaclipApp app)
         {
             this.App = app ?? throw new ArgumentNullException(nameof(app));
-
-            this.Name = new[] { "help" };
-            this.Description = "Provides help about the usage of the program and its commands.";
-            this.Options = Array.Empty<Option>();
-            this.Arguments = new[]
-            {
-                new Argument(typeof(string[]), Expression.Property(Expression.Variable(typeof(HelpOptions)), nameof(HelpOptions.Command)), false, "cmd"),
-            };
-            this.ObjectType = typeof(HelpOptions);
         }
 
-        public override void Run(object obj)
+        public void Run(object obj)
         {
             var opts = (HelpOptions)obj;
 
@@ -58,7 +59,7 @@ namespace Yaclip
             }
         }
 
-        private void HelpForCommands(IEnumerable<Command> cmds)
+        private void HelpForCommands(IEnumerable<ICommand> cmds)
         {
             var str = new StringBuilder();
             AppendHeader(str);
@@ -74,7 +75,7 @@ namespace Yaclip
             Console.WriteLine(str.ToString());
         }
 
-        private void HelpForCommand(Command cmd)
+        private void HelpForCommand(ICommand cmd)
         {
             var str = new StringBuilder();
             AppendHeader(str);
@@ -112,9 +113,9 @@ namespace Yaclip
                 .AppendLine();
         }
 
-        private void AppendCommand(StringBuilder str, Command cmd)
+        private void AppendCommand(StringBuilder str, ICommand cmd)
         {
-            str.Append($"{App.ExecutableName} {cmd.FullName}");
+            str.Append($"{App.ExecutableName} {cmd.FullName()}");
 
             foreach (var arg in cmd.Arguments)
             {

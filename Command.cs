@@ -2,36 +2,45 @@
 
 namespace Yaclip
 {
-    internal abstract class Command
+    internal interface ICommand
     {
-        public string? Description { get; protected set; }
-#nullable disable
-        public string[] Name { get; protected set; }
-        public Option[] Options { get; protected set; }
-        public Argument[] Arguments { get; protected set; }
-        public Type ObjectType { get; protected set; }
-#nullable enable
+        string[] Name { get; }
+        string? Description { get; }
+        Func<object> Factory { get; }
+        Type ObjectType { get; }
+        Option[] Options { get; }
+        Argument[] Arguments { get; }
 
-        public string FullName => string.Join(" ", Name);
-
-        public abstract void Run(object obj);
+        void Run(object obj);
     }
 
-    internal class Command<T> : Command
+    internal static class CommandExtensions
     {
+        public static string FullName(this ICommand cmd) => string.Join(" ", cmd.Name);
+    }
+
+    internal class Command<T> : ICommand
+    {
+        public string[] Name { get; }
+        public string? Description { get; }
+        public Func<object> Factory { get; }
+        public Option[] Options { get; }
+        public Argument[] Arguments { get; }
+        public Type ObjectType { get; }
         public Action<T> Callback { get; }
 
-        public Command(string[] name, string? description, Option[] options, Argument[] arguments, Type objectType, Action<T>? callback)
+        public Command(string[] name, string? description, Func<object> factory, Option[] options, Argument[] arguments, Type objectType, Action<T> callback)
         {
             this.Name = name ?? throw new ArgumentNullException(nameof(name));
-            this.Options = options;
-            this.Arguments = arguments;
+            this.Description = description;
+            this.Factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            this.Options = options ?? throw new ArgumentNullException(nameof(options));
+            this.Arguments = arguments ?? throw new ArgumentNullException(nameof(arguments));
             this.ObjectType = objectType ?? throw new ArgumentNullException(nameof(objectType));
             this.Callback = callback ?? throw new ArgumentNullException(nameof(callback));
-            this.Description = description;
         }
 
-        public override void Run(object obj)
+        public void Run(object obj)
         {
             Callback((T)obj);
         }

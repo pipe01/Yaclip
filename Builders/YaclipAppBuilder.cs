@@ -16,7 +16,7 @@ namespace Yaclip.Builders
 
     internal class YaclipAppBuilder : IYaclipAppBuilder
     {
-        private readonly IList<Command> Commands = new List<Command>();
+        private readonly IList<ICommand> Commands = new List<ICommand>();
         private string? Name, ExecutableName;
         private bool GenerateHelp = true;
 
@@ -29,11 +29,11 @@ namespace Yaclip.Builders
 
 #if DEBUG
             if (Commands.Any(o => o.Name.SequenceEqual(cmd.Name)))
-                throw new BuilderException($"Duplicate command name '{cmd.FullName}'");
+                throw new BuilderException($"Duplicate command name '{cmd.FullName()}'");
 
             var overlapping = Commands.FirstOrDefault(a => Commands.Any(b => a != b && a.Name.StartsWith(b.Name)));
             if (overlapping != null)
-                throw new BuilderException($"Command '{overlapping.FullName}' overlaps another command");
+                throw new BuilderException($"Command '{overlapping.FullName()}' overlaps another command");
 #endif
 
             Commands.Add(cmd);

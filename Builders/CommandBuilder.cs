@@ -12,6 +12,8 @@ namespace Yaclip
         ICommandBuilder<T> Option<TOpt>(Expression<Func<T, TOpt>> expr, string longName, Action<IOptionBuilder<TOpt>>? builder = null);
         ICommandBuilder<T> Option<TOpt>(Expression<Func<T, TOpt>> expr, char shortName, Action<IOptionBuilder<TOpt>>? builder = null);
 
+        ICommandBuilder<T> Factory(Func<T> factory);
+
         ICommandBuilder<T> Argument<TArg>(Expression<Func<T, TArg>> expr, Action<IArgumentBuilder<TArg>> builder);
         ICommandBuilder<T> Callback(Action<T> action);
         ICommandBuilder<T> Description(string description);
@@ -25,6 +27,7 @@ namespace Yaclip
         private readonly IList<Argument> Arguments = new List<Argument>();
         private string? Description;
         private Action<T>? CallbackAction;
+        private Func<T>? FactoryMethod;
 
         public CommandBuilder(string name)
         {
@@ -58,7 +61,13 @@ namespace Yaclip
             Options.Add(opt);
             return this;
         }
-        
+
+        ICommandBuilder<T> ICommandBuilder<T>.Factory(Func<T> factory)
+        {
+            FactoryMethod = factory;
+            return this;
+        }
+
         ICommandBuilder<T> ICommandBuilder<T>.Argument<TArg>(Expression<Func<T, TArg>> expr, Action<IArgumentBuilder<TArg>> builder)
         {
             var b = new ArgumentBuilder<TArg>(expr.Body);
@@ -93,7 +102,10 @@ namespace Yaclip
             if (CallbackAction == null)
                 throw new BuilderException("Missing callback action");
 
-            return new Command<T>(Name.Split(' '), Description, Options.ToArray(), Arguments.ToArray(), typeof(T), CallbackAction);
+            if (FactoryMethod == null)
+                FactoryMethod = Activator.CreateInstance<T>;
+
+            return new Command<T>(Name.Split(' '), Description, () => FactoryMethod()!, Options.ToArray(), Arguments.ToArray(), typeof(T), CallbackAction);
         }
     }
 }

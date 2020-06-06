@@ -46,15 +46,21 @@ namespace Yaclip
         {
             var tokens = new Queue<IToken>(Parser.Parse(args));
 
+            Command cmd;
+
             if (tokens.Count == 0)
             {
-                if (Commands.TryGet(out _, "help"))
-                    tokens.Enqueue(new StringToken("help", 0));
+                if (Commands.TryGet(out var rootCmd, ""))
+                    cmd = rootCmd;
+                else if (Commands.TryGet(out var helpCmd, "help"))
+                    cmd = helpCmd;
                 else
                     return;
             }
-
-            var cmd = GetCommand(tokens);
+            else
+            {
+                cmd = GetCommand(tokens);
+            }
 
             var optionsObj = cmd.Factory();
 

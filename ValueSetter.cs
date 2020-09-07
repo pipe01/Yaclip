@@ -1,24 +1,50 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq.Expressions;
 
 namespace Yaclip
 {
+    using static Expression;
+
     internal static class ValueSetter
     {
-        public static void SetValue(object target, Expression memberExpr, object value)
+        public static void SetValue(object target, Expression memberExpr, object value, bool isList)
         {
             var type = target.GetType();
 
-            var objParam = Expression.Parameter(typeof(object), "obj");
+            var objParam = Parameter(typeof(object), "obj");
 
-            memberExpr = new MyExpressionVisitor(Expression.Convert(objParam, type)).Visit(memberExpr);
+            memberExpr = new MyExpressionVisitor(Convert(objParam, type)).Visit(memberExpr);
 
-            Expression.Lambda<Action<object>>(Expression.Assign(memberExpr, Expression.Constant(value)), objParam).Compile()(target);
+            Action<object> action;
+
+            if (isList)
+            {
+                var itemType = memberExpr.Type.GetGenericArguments()[0];
+                var listType = typeof(List<>).MakeGenericType(itemType);
+
+                action = Lambda<Action<object>>(
+                    Block(
+                        IfThen(
+                            Equal(memberExpr, Constant(null)),
+                            Assign(memberExpr, New(listType))
+                        ),
+                        Call(Convert(memberExpr, listType), listType.GetMethod("Add"), Constant(value))
+                    ),
+                    objParam
+                ).Compile();
+            }
+            else
+            {
+                action = Lambda<Action<object>>(Assign(memberExpr, Constant(value)), objParam).Compile();
+            }
+
+            action(target);
         }
 
-        public static bool TryParseValue(string str, Type type, [MaybeNullWhen(false)]out object value)
+        public static bool TryParseValue(string str, Type type, [MaybeNullWhen(false)] out object value)
         {
             if (type == typeof(Version))
             {

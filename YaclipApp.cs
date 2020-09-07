@@ -136,7 +136,7 @@ namespace Yaclip
             if (!TryTakeValue(ref ctx, arg.Type, out var value))
                 throw new RunException($"Cannot parse value at position {ctx.Tokens.PeekOrDefault()?.Position}");
 
-            ValueSetter.SetValue(ctx.OptionsObj, arg.MemberExpression, value);
+            ValueSetter.SetValue(ctx.OptionsObj, arg.MemberExpression, value, false);
         }
 
         private static void ApplyOption(ref RunContext ctx, IOptionToken token)
@@ -151,7 +151,16 @@ namespace Yaclip
             if (opt == null)
                 throw new RunException($"Unknown option at position {token.Position}");
 
-            if (!TryTakeValue(ref ctx, opt.ValueType, out var value))
+            var propertyType = opt.ValueType;
+            bool isList = false;
+
+            if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(IList<>))
+            {
+                propertyType = propertyType.GetGenericArguments()[0];
+                isList = true;
+            }
+
+            if (!TryTakeValue(ref ctx, propertyType, out var value))
             {
                 if (opt.ValueType == typeof(bool))
                     value = true;
@@ -159,7 +168,7 @@ namespace Yaclip
                     throw new RunException($"Expected value at position {ctx.Tokens.PeekOrDefault()?.Position}");
             }
 
-            ValueSetter.SetValue(ctx.OptionsObj, opt.MemberExpression, value);
+            ValueSetter.SetValue(ctx.OptionsObj, opt.MemberExpression, value, isList);
         }
 
         private static bool TryTakeValue(ref RunContext ctx, Type valueType, [MaybeNullWhen(false)] out object value)

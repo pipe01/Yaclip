@@ -146,7 +146,7 @@ namespace Yaclip
             else
                 str.Append("]");
 
-            if (arg.Type.IsArray)
+            if (arg.Type.IsListType(out _))
                 str.Append("...");
         }
 

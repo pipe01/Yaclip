@@ -28,5 +28,17 @@ namespace Yaclip
 
             return i >= b.Length - 1;
         }
+
+        public static bool IsListType(this Type type, out Type itemType)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IList<>))
+            {
+                itemType = type.GetGenericArguments()[0];
+                return true;
+            }
+
+            itemType = null;
+            return false;
+        }
     }
 }

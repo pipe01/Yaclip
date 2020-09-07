@@ -173,9 +173,9 @@ namespace Yaclip
 
         private static bool TryTakeValue(ref RunContext ctx, Type valueType, [MaybeNullWhen(false)] out object value)
         {
-            if (valueType.IsArray)
+            if (valueType.IsListType(out var itemType))
             {
-                var del = (TakeArrayDelegate)typeof(YaclipApp).GetMethod(nameof(TakeArray), BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(valueType.GetElementType()).CreateDelegate(typeof(TakeArrayDelegate));
+                var del = (TakeListDelegate)typeof(YaclipApp).GetMethod(nameof(TakeList), BindingFlags.NonPublic | BindingFlags.Static).MakeGenericMethod(itemType).CreateDelegate(typeof(TakeListDelegate));
                 value = del(ctx);
                 return true;
             }
@@ -190,8 +190,8 @@ namespace Yaclip
             return ValueSetter.TryParseValue(strToken.Content, valueType, out value);
         }
 
-        private delegate object TakeArrayDelegate(RunContext ctx);
-        private static object TakeArray<T>(RunContext ctx)
+        private delegate object TakeListDelegate(RunContext ctx);
+        private static object TakeList<T>(RunContext ctx)
         {
             var list = new List<T>();
 
@@ -205,7 +205,7 @@ namespace Yaclip
                 list.Add((T)obj);
             }
 
-            return list.ToArray();
+            return list;
         }
 
         private ref struct RunContext

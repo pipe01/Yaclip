@@ -30,7 +30,7 @@ namespace Yaclip
             this.App = app ?? throw new ArgumentNullException(nameof(app));
         }
 
-        public override void Run(object obj)
+        public override int Run(object obj)
         {
             var opts = (HelpOptions)obj;
 
@@ -57,6 +57,8 @@ namespace Yaclip
                     HelpForCommands(cmds);
                 }
             }
+
+            return 0;
         }
 
         private void HelpForCommands(IEnumerable<Command> cmds)

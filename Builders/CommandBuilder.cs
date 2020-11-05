@@ -16,6 +16,7 @@ namespace Yaclip
 
         ICommandBuilder<T> Argument<TArg>(Expression<Func<T, TArg>> expr, Action<IArgumentBuilder<TArg>> builder);
         ICommandBuilder<T> Callback(Action<T> action);
+        ICommandBuilder<T> Callback(Func<T, int> action);
         ICommandBuilder<T> Description(string description);
     }
 
@@ -26,7 +27,7 @@ namespace Yaclip
         private readonly IList<Option> Options = new List<Option>();
         private readonly IList<Argument> Arguments = new List<Argument>();
         private string? Description;
-        private Action<T>? CallbackAction;
+        private Func<T, int>? CallbackAction;
         private Func<T>? FactoryMethod;
 
         public CommandBuilder(string name)
@@ -83,6 +84,19 @@ namespace Yaclip
         }
 
         ICommandBuilder<T> ICommandBuilder<T>.Callback(Action<T> action)
+        {
+            if (CallbackAction != null)
+                throw new BuilderException("Callback already defined");
+
+            CallbackAction = o =>
+            {
+                action(o);
+                return 0;
+            };
+            return this;
+        }
+        
+        ICommandBuilder<T> ICommandBuilder<T>.Callback(Func<T, int> action)
         {
             if (CallbackAction != null)
                 throw new BuilderException("Callback already defined");

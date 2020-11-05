@@ -74,7 +74,7 @@ namespace Yaclip
             if (requiredArgCount > ctx.SetArgumentsCount)
                 throw new RunException("Missing required arguments: " + string.Join(", ", cmd.Arguments.Skip(ctx.SetArgumentsCount).Where(o => o.Required).Select(o => o.Name)));
 
-            cmd.Run(optionsObj);
+            Environment.ExitCode = cmd.Run(optionsObj);
         }
 
         private Command GetCommand(Queue<IToken> tokens)

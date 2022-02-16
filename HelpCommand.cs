@@ -10,7 +10,7 @@ namespace Yaclip
     {
         private class HelpOptions
         {
-            public string[]? Command { get; set; }
+            public IReadOnlyList<string>? Command { get; set; }
         }
 
         public override string[] Name { get; } = new[] { "help" };

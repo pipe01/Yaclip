@@ -154,9 +154,9 @@ namespace Yaclip
             var propertyType = opt.ValueType;
             bool isList = false;
 
-            if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(IList<>))
+            if (propertyType.IsListType(out var itemType))
             {
-                propertyType = propertyType.GetGenericArguments()[0];
+                propertyType = itemType;
                 isList = true;
             }
 

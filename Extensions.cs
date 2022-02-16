@@ -12,12 +12,12 @@ namespace Yaclip
 
         public static bool ContainsAllItems<T>(this IEnumerable<T> a, IEnumerable<T> b) => !b.Except(a).Any();
 
-        public static bool StartsWith<T>(this T[] a, T[] b)
+        public static bool StartsWith<T>(this IReadOnlyList<T> a, IReadOnlyList<T> b)
         {
-            if (b.Length > a.Length)
+            if (b.Count > a.Count)
                 return false;
 
-            int len = Math.Min(a.Length, b.Length);
+            int len = Math.Min(a.Count, b.Count);
             int i;
 
             for (i = 0; i < len; i++)
@@ -26,15 +26,19 @@ namespace Yaclip
                     return false;
             }
 
-            return i >= b.Length - 1;
+            return i >= b.Count - 1;
         }
 
         public static bool IsListType(this Type type, out Type itemType)
         {
-            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IList<>))
+            if (type.IsGenericType)
             {
-                itemType = type.GetGenericArguments()[0];
-                return true;
+                var genericDef = type.GetGenericTypeDefinition();
+
+                if (genericDef == typeof(IList<>) || genericDef == typeof(IReadOnlyList<>)) {
+                    itemType = type.GetGenericArguments()[0];
+                    return true;
+                }
             }
 
             itemType = null;

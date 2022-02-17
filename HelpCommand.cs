@@ -20,7 +20,7 @@ namespace Yaclip
         public override Option[] Options { get; } = Array.Empty<Option>();
         public override Argument[] Arguments { get; } = new[]
         {
-            new Argument(typeof(string[]), Expression.Property(Expression.Variable(typeof(HelpOptions)), nameof(HelpOptions.Command)), false, "cmd"),
+            new Argument(typeof(IReadOnlyList<string>), Expression.Property(Expression.Variable(typeof(HelpOptions)), nameof(HelpOptions.Command)), false, "cmd"),
         };
 
         private readonly YaclipApp App;

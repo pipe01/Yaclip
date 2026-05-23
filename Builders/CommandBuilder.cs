@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace Yaclip
 {
@@ -16,7 +17,8 @@ namespace Yaclip
 
         ICommandBuilder<T> Argument<TArg>(Expression<Func<T, TArg>> expr, Action<IArgumentBuilder<TArg>> builder);
         ICommandBuilder<T> Callback(Action<T> action);
-        ICommandBuilder<T> Callback(Func<T, int> action);
+        ICommandBuilder<T> Callback(Func<T, Task> action);
+        ICommandBuilder<T> Callback(Func<T, Task<int>> action);
         ICommandBuilder<T> Description(string description);
     }
 
@@ -27,7 +29,7 @@ namespace Yaclip
         private readonly IList<Option> Options = new List<Option>();
         private readonly IList<Argument> Arguments = new List<Argument>();
         private string? Description;
-        private Func<T, int>? CallbackAction;
+        private Func<T, Task<int>>? CallbackAction;
         private Func<T>? FactoryMethod;
 
         public CommandBuilder(string name)
@@ -37,10 +39,10 @@ namespace Yaclip
 
         ICommandBuilder<T> ICommandBuilder<T>.Option<TOpt>(Expression<Func<T, TOpt>> expr, char shortName, Action<IOptionBuilder<TOpt>>? builder)
             => Option(expr, shortName, null, builder);
-        
+
         ICommandBuilder<T> ICommandBuilder<T>.Option<TOpt>(Expression<Func<T, TOpt>> expr, string longName, Action<IOptionBuilder<TOpt>>? builder)
             => Option(expr, null, longName, builder);
-        
+
         ICommandBuilder<T> ICommandBuilder<T>.Option<TOpt>(Expression<Func<T, TOpt>> expr, char shortName, string longName, Action<IOptionBuilder<TOpt>>? builder)
             => Option(expr, shortName, longName, builder);
 
@@ -88,15 +90,28 @@ namespace Yaclip
             if (CallbackAction != null)
                 throw new BuilderException("Callback already defined");
 
-            CallbackAction = o =>
+            CallbackAction = async o =>
             {
                 action(o);
                 return 0;
             };
             return this;
         }
-        
-        ICommandBuilder<T> ICommandBuilder<T>.Callback(Func<T, int> action)
+
+        ICommandBuilder<T> ICommandBuilder<T>.Callback(Func<T, Task> action)
+        {
+            if (CallbackAction != null)
+                throw new BuilderException("Callback already defined");
+
+            CallbackAction = async o =>
+            {
+                await action(o);
+                return 0;
+            };
+            return this;
+        }
+
+        ICommandBuilder<T> ICommandBuilder<T>.Callback(Func<T, Task<int>> action)
         {
             if (CallbackAction != null)
                 throw new BuilderException("Callback already defined");

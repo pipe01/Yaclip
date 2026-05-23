@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Yaclip
 {
@@ -28,11 +29,11 @@ namespace Yaclip
                 this.Commands.Add(new HelpCommand(this));
         }
 
-        public void Run(string[] args)
+        public async Task Run(string[] args)
         {
             try
             {
-                RunInner(args);
+                await RunInner(args);
             }
             catch (RunException ex) when (!Debugger.IsAttached)
             {
@@ -42,7 +43,7 @@ namespace Yaclip
             }
         }
 
-        private void RunInner(string[] args)
+        private async Task RunInner(string[] args)
         {
             var tokens = new Queue<IToken>(Parser.Parse(args));
 
@@ -74,7 +75,7 @@ namespace Yaclip
             if (requiredArgCount > ctx.SetArgumentsCount)
                 throw new RunException("Missing required arguments: " + string.Join(", ", cmd.Arguments.Skip(ctx.SetArgumentsCount).Where(o => o.Required).Select(o => o.Name)));
 
-            Environment.ExitCode = cmd.Run(optionsObj);
+            Environment.ExitCode = await cmd.Run(optionsObj);
         }
 
         private Command GetCommand(Queue<IToken> tokens)

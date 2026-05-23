@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Yaclip
@@ -29,13 +30,14 @@ namespace Yaclip
             return i >= b.Count - 1;
         }
 
-        public static bool IsListType(this Type type, out Type itemType)
+        public static bool IsListType(this Type type, [MaybeNullWhen(false)] out Type itemType)
         {
             if (type.IsGenericType)
             {
                 var genericDef = type.GetGenericTypeDefinition();
 
-                if (genericDef == typeof(IList<>) || genericDef == typeof(IReadOnlyList<>)) {
+                if (genericDef == typeof(IList<>) || genericDef == typeof(IReadOnlyList<>))
+                {
                     itemType = type.GetGenericArguments()[0];
                     return true;
                 }

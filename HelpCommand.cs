@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Yaclip
 {
@@ -30,7 +31,7 @@ namespace Yaclip
             this.App = app ?? throw new ArgumentNullException(nameof(app));
         }
 
-        public override int Run(object obj)
+        public override async Task<int> Run(object obj)
         {
             var opts = (HelpOptions)obj;
 

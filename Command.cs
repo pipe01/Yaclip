@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Yaclip
 {
@@ -10,7 +11,7 @@ namespace Yaclip
         public virtual Option[] Options { get; }
         public virtual Argument[] Arguments { get; }
         public virtual Type ObjectType { get; }
-        public virtual Func<object, int> Callback { get; }
+        public virtual Func<object, Task<int>> Callback { get; }
 
         public string FullName => string.Join(" ", Name);
 
@@ -20,7 +21,7 @@ namespace Yaclip
         }
 #nullable enable
 
-        public Command(string[] name, string? description, Func<object> factory, Option[] options, Argument[] arguments, Type objectType, Func<object, int> callback)
+        public Command(string[] name, string? description, Func<object> factory, Option[] options, Argument[] arguments, Type objectType, Func<object, Task<int>> callback)
         {
             this.Name = name ?? throw new ArgumentNullException(nameof(name));
             this.Description = description;
@@ -31,9 +32,9 @@ namespace Yaclip
             this.Callback = callback ?? throw new ArgumentNullException(nameof(callback));
         }
 
-        public virtual int Run(object obj)
+        public virtual async Task<int> Run(object obj)
         {
-            return Callback(obj);
+            return await Callback(obj);
         }
     }
 }

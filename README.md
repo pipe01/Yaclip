@@ -16,7 +16,7 @@ class NewOptions
 
 class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         var app = YaclipApp.New()
             .Name("My example application")
@@ -34,7 +34,7 @@ class Program
                     .Description("The extension of the new file")
                     .ValueName("ext"))); // Only used for generating help message
 
-        app.Build().Run(args);
+        await app.Build().Run(args);
     }
 }
 ```
